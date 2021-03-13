@@ -66,12 +66,10 @@ def advanced_user_data(steamid, user_dictionary):
     
     #api url for user's game data
     owned_games_url = (
-        f"http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key={skey}&steamid=76561198048037824&format=json"
+        f"http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key={skey}&steamid={steamid}&format=json"
                       )
     game_list = requests.get(owned_games_url).json()
     
-    #intialize temporary counter for game numbering
-    play_count = 0   
     #intialize temporary dictionary container
     user_game_stats = {}
     
@@ -93,8 +91,6 @@ def advanced_user_data(steamid, user_dictionary):
                     name_of_the_game = game_ids[appid]
                     
                 hours_played = game_list["response"]["games"][i].get("playtime_forever")
-                #function to get appid actual name
-                play_count += 1
 
                 user_game_stats.update({name_of_the_game : {"appid" : appid,
                                                             "hours played" : "{:.2f}".format(hours_played/60)}
@@ -108,6 +104,10 @@ def advanced_user_data(steamid, user_dictionary):
     return user_dictionary
 
 def all_user_data(steamid):
+
     user_dictionary = basic_user_data(steamid)
+    
     final_user_dictionary = advanced_user_data(steamid, user_dictionary)
+    
     return final_user_dictionary
+
