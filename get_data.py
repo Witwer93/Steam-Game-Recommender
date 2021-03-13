@@ -15,6 +15,9 @@ import json
 import pprint as pp
 from collections import OrderedDict 
 
+# Retrieve page with the requests module
+executable_path = {'executable_path': ChromeDriverManager().install()}
+browser = Browser('chrome', **executable_path, headless=False)
 
 #dictionary to store game_titles and correspondingn appids
 game_ids = {}
@@ -62,34 +65,70 @@ def basic_user_data(steamid):
     return user_dictionary
 
 #function to collect specified users owned games and hours played for each game
-def advanced_user_data(steamid, user_dictionary):
+# def advanced_user_data(steamid, user_dictionary):
+    
+#     #api url for user's game data
+#     owned_games_url = f"http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key={skey}&steamid={steamid}&format=json"
+#     game_list = requests.get(owned_games_url).json()
+    
+#     #print(f"found {game_list["response"]["game_count"]} total games for id: {steamid}"
+#     #intialize temporary dictionary container
+#     user_game_stats = {}
+    
+#     play_count = 0
+#     for i in range(game_list["response"]["game_count"]):
+    
+#         #initialize temporary variables
+#         appid = 0
+        
+#         try:
+#             if game_list["response"]["games"][i].get("playtime_forever") != 0:
+#                 play_count += 1
+#                 #pull game id
+#                 appid = game_list["response"]["games"][i].get("appid")
+#                 identifier = str(appid)
+                
+#                 #identify the game
+#                 if identifier not in game_ids:
+#                     name_of_the_game = demystify(appid)
+#                 elif identifier in game_ids:
+#                     name_of_the_game = game_ids[appid]
+                    
+#                 hours_played = game_list["response"]["games"][i].get("playtime_forever")
+
+#                 user_game_stats.update({name_of_the_game : {"appid" : appid,
+#                                                             "hours played" : "{:.2f}".format(hours_played/60)}
+#                                        })
+#         except:
+#             "KeyError"
+                
+            
+#     user_dictionary.update({"total_games_played" : play_count})
+#     user_dictionary.update({"user_game_data" : user_game_stats})
+#     return user_dictionary
+def advanced_user_data2(steamid, user_dictionary):
     
     #api url for user's game data
-    owned_games_url = (
-        f"http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key={skey}&steamid={steamid}&format=json"
-                      )
+    owned_games_url = f"http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key={skey}&steamid={steamid}&format=json"
     game_list = requests.get(owned_games_url).json()
-    
+
+    #print(f"found {game_list['response']['game_count']} total games for id: {steamid}")
     #intialize temporary dictionary container
     user_game_stats = {}
-    
+
+    play_count = 0
     for i in range(game_list["response"]["game_count"]):
-    
+
         #initialize temporary variables
         appid = 0
-        hours_played = 0
+
         try:
             if game_list["response"]["games"][i].get("playtime_forever") != 0:
-                
+                play_count += 1
                 #pull game id
                 appid = game_list["response"]["games"][i].get("appid")
-                identifier = str(appid)
-                #identify the game
-                if identifier not in game_ids:
-                    name_of_the_game = demystify(appid)
-                elif identifier in game_ids:
-                    name_of_the_game = game_ids[appid]
-                    
+                name_of_the_game = "game"+str(i)
+
                 hours_played = game_list["response"]["games"][i].get("playtime_forever")
 
                 user_game_stats.update({name_of_the_game : {"appid" : appid,
@@ -97,8 +136,6 @@ def advanced_user_data(steamid, user_dictionary):
                                        })
         except:
             "KeyError"
-                
-            
     user_dictionary.update({"total_games_played" : play_count})
     user_dictionary.update({"user_game_data" : user_game_stats})
     return user_dictionary
@@ -107,7 +144,7 @@ def all_user_data(steamid):
 
     user_dictionary = basic_user_data(steamid)
     
-    final_user_dictionary = advanced_user_data(steamid, user_dictionary)
+    final_user_dictionary = advanced_user_data2(steamid, user_dictionary)
     
     return final_user_dictionary
 

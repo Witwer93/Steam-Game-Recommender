@@ -30,7 +30,8 @@ def build_collection():
     #print(len(steamid_collection))
 
     #now to find friends of friends
-    for i in range(150):
+    i = 0
+    while len(steamid_collection) <= 20000:
         
         #reset query url for next steam id in collection
         friend_list_url = f"""http://api.steampowered.com/ISteamUser/GetFriendList/v0001/?key={skey}&steamid={steamid_collection[i]}&relationship=friend"""
