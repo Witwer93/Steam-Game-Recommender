@@ -16,11 +16,13 @@ import pprint as pp
 from collections import OrderedDict 
 
 # Retrieve page with the requests module
-executable_path = {'executable_path': ChromeDriverManager().install()}
-browser = Browser('chrome', **executable_path, headless=False)
+# executable_path = {'executable_path': ChromeDriverManager().install()}
+# browser = Browser('chrome', **executable_path, headless=False)
 
-#dictionary to store game_titles and correspondingn appids
-game_ids = {}
+#list for steamids_that returned no game data
+bad_id_list = []
+#dictionary to store game_titles and corresponding appids
+app_ids = []
 #function to identify each game from its appid
 def demystify(appid):
     
@@ -101,7 +103,7 @@ def basic_user_data(steamid):
 #                                        })
 #         except:
 #             "KeyError"
-                
+               
             
 #     user_dictionary.update({"total_games_played" : play_count})
 #     user_dictionary.update({"user_game_data" : user_game_stats})
@@ -113,29 +115,39 @@ def advanced_user_data2(steamid, user_dictionary):
     game_list = requests.get(owned_games_url).json()
 
     #print(f"found {game_list['response']['game_count']} total games for id: {steamid}")
+    
     #intialize temporary dictionary container
     user_game_stats = {}
-
+    try:
+        user_dictionary.update({"total_games_owned" : game_list["response"]["game_count"]})
+    except:
+        "KeyError"
+        bad_id_list.append(steamid)
+        return None 
+    
     play_count = 0
     for i in range(game_list["response"]["game_count"]):
 
         #initialize temporary variables
         appid = 0
-
+        
         try:
             if game_list["response"]["games"][i].get("playtime_forever") != 0:
                 play_count += 1
                 #pull game id
-                appid = game_list["response"]["games"][i].get("appid")
+                appid = str(game_list["response"]["games"][i].get("appid"))
                 name_of_the_game = "game"+str(i)
-
+                app_ids.append(appid)
+                
+                
                 hours_played = game_list["response"]["games"][i].get("playtime_forever")
 
-                user_game_stats.update({name_of_the_game : {"appid" : appid,
-                                                            "hours played" : "{:.2f}".format(hours_played/60)}
+                user_game_stats.update({appid : {"game_number" : name_of_the_game,
+                                                 "hours_played" : "{:.2f}".format(hours_played/60)}
                                        })
         except:
             "KeyError"
+            
     user_dictionary.update({"total_games_played" : play_count})
     user_dictionary.update({"user_game_data" : user_game_stats})
     return user_dictionary
