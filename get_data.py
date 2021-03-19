@@ -117,7 +117,7 @@ def advanced_user_data2(steamid, user_dictionary):
     #print(f"found {game_list['response']['game_count']} total games for id: {steamid}")
     
     #intialize temporary dictionary container
-    user_game_stats = {}
+    user_game_stats = []
     try:
         user_dictionary.update({"total_games_owned" : game_list["response"]["game_count"]})
     except:
@@ -141,10 +141,13 @@ def advanced_user_data2(steamid, user_dictionary):
                 
                 
                 hours_played = game_list["response"]["games"][i].get("playtime_forever")
+                
+                game_info = {'app_id' : appid,
+                             'hours_played' : "{:.2f}".format(hours_played/60),
+                             'game_title' : name_of_the_game}
+                
+                user_game_stats.append(game_info)
 
-                user_game_stats.update({appid : {"game_number" : name_of_the_game,
-                                                 "hours_played" : "{:.2f}".format(hours_played/60)}
-                                       })
         except:
             "KeyError"
             
